@@ -3,10 +3,16 @@ import warnings
 from matplotlib import gridspec
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras import layers
+from tensorflow.keras import models
+from tensorflow.keras import optimizers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
 
 #For distribution of images run Categorisation first
+
+train_dir = "./Data/train"
+validation_dir = "./Data/validation"
 
 # Reproducability
 seed = 1
@@ -40,17 +46,45 @@ for data_batch, labels_batch in train_generator:
     break
 
 
+#Adding a pretrained base
+pretrained_base = tf.keras.applications.InceptionV3()
+
+pretrained_base.trainable = False
+
+#Creating the model
+model = keras.Sequential([
+    pretrained_base,
+    layers.Flatten(),
+    layers.Dense(units=6, activation='relu'),
+    layers.Dense(units=1, activation='sigmoid')
+    ])
+
+#Choosing an optimizer for the model
+optimizer = tf.keras.optimizers.Adam(epsilon=0.01)
+
+#compiling the model
+model.compile(
+    optimizer=optimizer,
+    loss = 'binary_crossentropy',
+    metrics=['binary_accuracy']
+    )
 
 
 
+history = model.fit_generator(
+    train_generator, 
+    steps_per_epoch=100,
+    epoch=100,
+    epochs=30
+    validaiton_data=validation_generator,
+    validation_steps=50
+    )
 
 
-
-
-
-
-
-
+import pandas as pd
+history_frame = pd.DataFrame(history.history)
+history_frame.loc[:, ['loss', 'val_loss']].plot()
+history_frame.loc[:, ['binary_accuracy', 'val_binary_accuracy']].plot();
 
 
 
