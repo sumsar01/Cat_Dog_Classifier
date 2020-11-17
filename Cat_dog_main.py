@@ -47,15 +47,25 @@ for data_batch, labels_batch in train_generator:
 
 
 #Adding a pretrained base
-pretrained_base = tf.keras.applications.InceptionV3()
 
-pretrained_base.trainable = False
 
 #Creating the model
-model = keras.Sequential([
-    pretrained_base,
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+    layers.MaxPooling2D((2,2)),
+    
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2,2)),
+    
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2,2)),  
+    
+    layers.Conv2D(128, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2,2)),
+      
     layers.Flatten(),
-    layers.Dense(units=6, activation='relu'),
+    layers.Dense(units=256, activation='relu'),
+    layers.Dense(units=512, activation='relu'),
     layers.Dense(units=1, activation='sigmoid')
     ])
 
@@ -74,9 +84,8 @@ model.compile(
 history = model.fit_generator(
     train_generator, 
     steps_per_epoch=100,
-    epoch=100,
-    epochs=30
-    validaiton_data=validation_generator,
+    epochs=30,
+    validation_data=validation_generator,
     validation_steps=50
     )
 
